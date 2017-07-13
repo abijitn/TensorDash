@@ -1,0 +1,35 @@
+{
+    "security": {
+        "nameIdEncrypted": false,
+        "authnRequestsSigned": false,
+        "logoutRequestSigned": false,
+        "logoutResponseSigned": false,
+        "signMetadata": false,
+        "wantMessagesSigned": false,
+        "wantAssertionsSigned": false,
+        "wantAttributeStatement": true,
+        "requestedAuthnContext": true,
+        "wantNameId" : true,
+        "wantNameIdEncrypted": false,
+        "wantAssertionsEncrypted": false,
+        "signatureAlgorithm": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+        "digestAlgorithm": "http://www.w3.org/2000/09/xmldsig#sha1"
+    },
+    "contactPerson": {
+        "technical": {
+            "givenName": "Abijit Gowda",
+            "emailAddress": "nanab01@ca.com"
+        },
+        "support": {
+            "givenName": "AI-Middleware",
+            "emailAddress": "AI-Middleware@ca.com"
+        }
+    },
+    "organization": {
+        "en-US": {
+            "name": "UserJourney",
+            "displayname": "UserJourney.ca.com",
+            "url": "https://UserJourney.ca.com"
+        }
+    }
+}

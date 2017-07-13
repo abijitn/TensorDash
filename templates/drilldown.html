@@ -1,0 +1,73 @@
+{% extends "index.html" %}
+
+{% block title %}
+{{ title }}
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+        // get the data from the server
+        $.getJSON("/data").done(function(data) {
+            // display the plot for the given statistic
+            makePlot(data, '{{ stat }}');
+            // if category data is given, make the table to go below the graph, else hide the table
+            if (data['{{ stat }}']["categories"].length > 0) {
+                makeTable(data, '{{ stat }}');
+            } else {
+                $("#categories").css({"display": "none"});
+                $("#scroll").css({"display": "none"});
+            }
+            // if the graph is a line graph, then previous values should be displayed, else hide the bottom tiles
+            if (data['{{ stat }}']["graphType"] == "line") {
+                for (i = 1; i < 6; i++) {
+                    displayBottomTiles(data, '{{ stat }}');
+                }
+            } else {
+                $("#prev-values-container").css({"display": "none"});
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block backbutton %}
+<a href="/homepage" class="back-button">Back to Dashboard</a>
+{% endblock %}
+
+{% block main %}
+<div class="main-graph" id="main-graph">
+    <div class="current-value" id="current-value"></div>
+    <div id="pct-change"></div>
+    <div id="plot"></div>
+</div>
+<table id="categories">
+    <tr>
+        <th>Breakout</th>
+    </tr>
+    <tr>
+        <td>New</td>
+    </tr>
+    <tr>
+        <td>Expansion</td>
+    </tr>
+    <tr>
+        <td>Churn</td>
+    </tr>
+    <tr>
+        <td>Net New</td>
+    </tr>
+</table>
+<div id="scroll" class="wrapper">
+    <table id="category-data"></table>
+</div>
+<div class="prev-values-container" id="prev-values-container">
+{% for i in [1, 2, 3, 4, 5] %}
+    <div class="prev-value" id="pv{{ i }}">
+        <br>
+        <span id="pvv{{ i }}" class="pvv"></span>
+        <span id="pvp{{ i }}" class="pvp"></span>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}

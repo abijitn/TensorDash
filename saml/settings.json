@@ -1,0 +1,30 @@
+{
+    "strict": true,
+    "debug": true,
+    "sp": {
+        "entityId": "https://10.149.71.13/metadata/",
+        "assertionConsumerService": {
+            "url": "https://10.149.71.13/?acs",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+        },
+        "singleLogoutService": {
+            "url": "https://10.149.71.13/?sls",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+        "x509cert": "",
+        "privateKey": ""
+    },
+    "idp": {
+        "entityId": "samlgwsm-qa.ca.com",
+        "singleSignOnService": {
+            "url": "https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "singleLogoutService": {
+            "url": "https://samlgwsm-qa.ca.com/affwebservices/public/saml2slo",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "x509cert": "MIIDtTCCAx6gAwIBAgIJANyGV9aYlcWjMA0GCSqGSIb3DQEBBQUAMIGZMQswCQYDVQQGEwJVUzERMA8GA1UECBMITmV3IFlvcmsxETAPBgNVBAcTCElzbGFuZGlhMQswCQYDVQQKEwJDQTEcMBoGA1UECxMTRW50ZXJwcmlzZSBTZWN1cml0eTESMBAGA1UEAxMJcHMuY2EuY29tMSUwIwYJKoZIhvcNAQkBFhZFbnRTZWN1cml0eUNvbW1AY2EuY29tMB4XDTA4MDMyNjE3NTcyNVoXDTE4MDMyNDE3NTcyNVowgZkxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhOZXcgWW9yazERMA8GA1UEBxMISXNsYW5kaWExCzAJBgNVBAoTAkNBMRwwGgYDVQQLExNFbnRlcnByaXNlIFNlY3VyaXR5MRIwEAYDVQQDEwlwcy5jYS5jb20xJTAjBgkqhkiG9w0BCQEWFkVudFNlY3VyaXR5Q29tbUBjYS5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALi5ncGKCAGVSFpr9ucjxsl3zZ+Nd9TLo0VaD6dEhN7wPRLuy+K9Dhbs6JGqXnhG8Zxf2UiXFZXIj9lQqswkweeUfxdcJAheu8U7WW2mB7LMlzfcH2zuhk8BtPN2eYGaV+8uXMlVH7o5p22oxrEfihdEI+sd3G3/zr9lFdcDYALjAgMBAAGjggEBMIH+MB0GA1UdDgQWBBROqKqE2I5cBQLbUd0yDsNQqS2kczCBzgYDVR0jBIHGMIHDgBROqKqE2I5cBQLbUd0yDsNQqS2kc6GBn6SBnDCBmTELMAkGA1UEBhMCVVMxETAPBgNVBAgTCE5ldyBZb3JrMREwDwYDVQQHEwhJc2xhbmRpYTELMAkGA1UEChMCQ0ExHDAaBgNVBAsTE0VudGVycHJpc2UgU2VjdXJpdHkxEjAQBgNVBAMTCXBzLmNhLmNvbTElMCMGCSqGSIb3DQEJARYWRW50U2VjdXJpdHlDb21tQGNhLmNvbYIJANyGV9aYlcWjMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAAndQ4wCJcfEk5/QTvBwkvN4DVz1oMTj+YBOcZk30h2GBmBD0um+RHuXSXdncp7AebwMwh/I0zrIAjDNVlKgDZAML1fSCqMliQR/KwOSlkSS0aC+j7XFxjgaHTWhN+xjaUZSS1HQzLHbG6SHd27MTM+laYHnG8uCtnQ9lRplkoy8="
+    }
+}

@@ -1,0 +1,24 @@
+{% extends "index.html" %}
+
+{% block title %}
+Tensor Executive Dashboard
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='dashboardsetup.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+{% for stat in stats %}
+	<a href="/stat/{{ stat }}">
+		<div class="dash-stat" id="{{ stat }}">
+			<span id="dash-stat-{{ stat }}"></span>
+			<span class="pvp pvp-dash" id="{{ stat }}Change"></span>
+			<br>
+			<span class="pvv pvv-dash" id="{{ stat }}Val"></span>
+			<span class="timescale" id="{{ stat }}Since"></span>
+			<div class="dash-plot" id="{{ stat }}Plot"></div>
+		</div>
+	</a>
+{% endfor %}
+{% endblock %}
