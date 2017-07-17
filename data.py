@@ -11,8 +11,6 @@ class Statistic:
 		workbook = None,
 		sheetName = None,
 		title = None,
-		associatedStat = None,
-		associatedStatSheetColumns = None,
 		prefix = "",
 		suffix = "",
 		timescale = None,
@@ -34,10 +32,6 @@ class Statistic:
 		self.info = dict(
 			# name to display on the tile/at the top of the page
 			title = title,
-			# use this field if there is data for this metric in more than one sheet in the workbook
-			associatedStat = associatedStat,
-			# a dictionary that maps the keys "date," "value," and "category" to their associated capital column letters on the spreadsheet
-			associatedStatSheetColumns = associatedStatSheetColumns,
 			# prefix to display before values of this metric (i.e., $)
 			prefix = prefix,
 			# suffix to display after values of this metric (i.e., M)
@@ -74,13 +68,11 @@ class Statistic:
 		self.initializeCategoryValuesDict()
 		# read the metric data from the spreadsheet
 		self.readSheet()
-		# get relevant data from an associated spreadsheet, if there is one
-		self.getAssociatedStat()
 
 	def initializeCategoryValuesDict(self):
 		if self.info["categories"] != None:
 			for category in self.info["categories"]:
-				self.info["categoryValues"][category] = dict(
+				self.info["categoryValues"][category[0]] = dict(
 					dates = [],
 					values = []
 				)
@@ -119,20 +111,13 @@ class Statistic:
 							self.info["values"]["values"].append(value)
 						self.info["categoryValues"][category]["dates"].append(date)
 						self.info["categoryValues"][category]["values"].append(value)
-					elif self.info["associatedStat"] == None:
+					else:
 						self.info["values"]["dates"].append(date)
 						self.info["values"]["values"].append(value)
 			rowIndex += 1
 
-	def getAssociatedStat(self):
-		if self.info["associatedStat"] != None:
-			# initialize the associatedStat as a Statistic object, and assign its values field to the values field of this Statistic object
-			assocStat = Statistic(
-				workbook = self.workbook,
-				sheetName = self.info["associatedStat"],
-				isPercentage = self.info["isPercentage"],
-				sheetColumns = self.info["associatedStatSheetColumns"]
-			)
-			self.info["values"] = assocStat.info["values"]
+
+
+
 
 

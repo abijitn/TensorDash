@@ -24,17 +24,19 @@ from data import Statistic
 data = dict()
 
 categories = [
-    "New",
-    "Expansion",
-    "Churn",
-    "Net New"
+    ["New", "green", "red"],
+    ["Expansion", "green", "red"],
+    ["Downgrade", "red", "green"],
+    ["Churn", "red", "green"],
+    ["Net New", "green", "red"],
+    ["Total", "black", "black"]
 ]
 
 prevValuesByMonth = [
     "Current",
-    "1 Month Ago",
     "3 Months Ago",
     "6 Months Ago",
+    "9 Months Ago",
     "1 Year Ago"
 ]
 
@@ -47,7 +49,7 @@ prevValuesByQuarter = [
 ]
 
 # open the excel file
-wb = openpyxl.load_workbook("TensorDashboardData.xlsx")
+wb = openpyxl.load_workbook("Tensor Dashboard Data 7-14-17.xlsx")
 
 """THIS LIST CONTROLS THE TILES DISPLAYED ON THE WEBSITE. THE NAMES HERE
 SHOULD MATCH THE DICTIONARY KEYS AND RESPECTIVE SHEET NAMES EXACTLY. IN ORDER
@@ -56,6 +58,7 @@ A NEW STATISTIC OBJECT AS DEMONSTRATED BELOW."""
 stats = [
     "ARR",
     "ARRDetailed",
+    "ARPU",
     "Seats",
     "Customers",
     "ARRChurnPct",
@@ -71,12 +74,6 @@ data["ARR"] = Statistic(
     workbook = wb,
     sheetName = "ARR",
     title = "ARR",
-    associatedStat = "ARRTotal",
-    associatedStatSheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    ),
     prefix = "$",
     suffix = "M",
     timescale = "months",
@@ -84,8 +81,29 @@ data["ARR"] = Statistic(
     posColor = "green",
     negColor = "red",
     categories = categories,
-    categoryToGraph = None,
+    categoryToGraph = "Total",
     prevValueHeaders = prevValuesByMonth,
+    isPercentage = False,
+    sheetColumns = dict(
+        date = "A",
+        category = "B",
+        value = "C"
+    )
+).info
+
+data["ARPU"] = Statistic(
+    workbook = wb,
+    sheetName = "ARPU",
+    title = "ARPU",
+    prefix = "$",
+    suffix = "M",
+    timescale = "quarters",
+    dps = 2,
+    posColor = "green",
+    negColor = "red",
+    categories = categories,
+    categoryToGraph = "Total",
+    prevValueHeaders = prevValuesByQuarter,
     isPercentage = False,
     sheetColumns = dict(
         date = "A",
@@ -98,12 +116,6 @@ data["Customers"] = Statistic(
     workbook = wb,
     sheetName = "Customers",
     title = "Customers",
-    associatedStat = "CustomerTotal",
-    associatedStatSheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    ),
     prefix = "",
     suffix = "",
     timescale = "months",
@@ -111,7 +123,7 @@ data["Customers"] = Statistic(
     posColor = "green",
     negColor = "red",
     categories = categories,
-    categoryToGraph = None,
+    categoryToGraph = "Total",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = False,
     sheetColumns = dict(
@@ -125,12 +137,6 @@ data["Seats"] = Statistic(
     workbook = wb,
     sheetName = "Seats",
     title = "Seats",
-    associatedStat = "SeatsTotal",
-    associatedStatSheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    ),
     prefix = "",
     suffix = "",
     timescale = "months",
@@ -138,7 +144,7 @@ data["Seats"] = Statistic(
     posColor = "green",
     negColor = "red",
     categories = categories,
-    categoryToGraph = None,
+    categoryToGraph = "Total",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = False,
     sheetColumns = dict(
@@ -152,7 +158,6 @@ data["ARRChurnPct"] = Statistic(
     workbook = wb,
     sheetName = "ARRChurnPct",
     title = "ARR Churn Rate",
-    associatedStat = None,
     prefix = "",
     suffix = "%",
     timescale = "months",
@@ -173,7 +178,6 @@ data["SeatChurnPct"] = Statistic(
     workbook = wb,
     sheetName = "SeatChurnPct",
     title = "Seat Churn Rate",
-    associatedStat = None,
     prefix = "",
     suffix = "%",
     timescale = "months",
@@ -194,7 +198,6 @@ data["SAOs"] = Statistic(
     workbook = wb,
     sheetName = "SAOs",
     title = "SAOs",
-    associatedStat = None,
     prefix = "",
     suffix = "",
     timescale = "months",
@@ -215,7 +218,6 @@ data["SRLs"] = Statistic(
     workbook = wb,
     sheetName = "SRLs",
     title = "SRLs",
-    associatedStat = None,
     prefix = "",
     suffix = "",
     timescale = "months",
@@ -236,7 +238,6 @@ data["MQLs"] = Statistic(
     workbook = wb,
     sheetName = "MQLs",
     title = "MQLs",
-    associatedStat = None,
     prefix = "",
     suffix = "",
     timescale = "months",
@@ -257,7 +258,6 @@ data["NoOfTrialsRequested"] = Statistic(
     workbook = wb,
     sheetName = "NoOfTrialsRequested",
     title = "Number Of Trials Requested",
-    associatedStat = None,
     prefix = "",
     suffix = "",
     timescale = "months",
