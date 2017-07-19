@@ -24,12 +24,27 @@ from data import Statistic
 data = dict()
 
 categories = [
-    ["New", "green", "red"],
-    ["Expansion", "green", "red"],
-    ["Downgrade", "red", "green"],
-    ["Churn", "red", "green"],
-    ["Net New", "green", "red"],
-    ["Total", "black", "black"]
+    ["Land", "green", "green"],
+    ["Expand", "green", "green"],
+    ["Downgrade", "red", "red"],
+    ["Lost", "red", "red"],
+    ["Net New", "green", "red"]
+]
+
+catsForARRDetailed = categories[:]
+catsForARRDetailed[0] = categories[1]
+catsForARRDetailed[1] = categories[0]
+
+def getCategories(stat):
+    categories1 = [["Starting " + stat, "black", "black"]] + categories + [["Ending " + stat, "black", "black"]]
+    return categories1 
+
+definitions = [
+    ["Land", "Lorem Ipsum", "good-category"],
+    ["Expand", "Lorem Ipsum", "good-category"],
+    ["Downgrade", "Lorem Ipsum", "bad-category"],
+    ["Lost", "Lorem Ipsum", "bad-category"],
+    ["Net New", "Lorem Ipsum", "good-category"]
 ]
 
 prevValuesByMonth = [
@@ -49,7 +64,7 @@ prevValuesByQuarter = [
 ]
 
 # open the excel file
-wb = openpyxl.load_workbook("Tensor Dashboard Data 7-14-17.xlsx")
+wb = openpyxl.load_workbook("AgileCentralData.xlsx")
 
 """THIS LIST CONTROLS THE TILES DISPLAYED ON THE WEBSITE. THE NAMES HERE
 SHOULD MATCH THE DICTIONARY KEYS AND RESPECTIVE SHEET NAMES EXACTLY. IN ORDER
@@ -58,58 +73,112 @@ A NEW STATISTIC OBJECT AS DEMONSTRATED BELOW."""
 stats = [
     "ARR",
     "ARRDetailed",
-    "ARPU",
-    "Seats",
+    "LTV",
+    "CAC",
+    "LTV-CACRatio",
     "Customers",
+    "Seats",
     "ARRChurnPct",
+    "ARPA",
     "SeatChurnPct",
+    "NoOfTrialsRequested",
     "SAOs",
     "SRLs",
-    "MQLs",
-    "NoOfTrialsRequested",
+    "NPSSegPct",
+    "NPS"
+    #"MQLs"
 ]
-
 
 data["ARR"] = Statistic(
     workbook = wb,
     sheetName = "ARR",
-    title = "ARR",
+    title = "ARR (Annual Recurring Revenue)",
     prefix = "$",
     suffix = "M",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 2,
     posColor = "green",
     negColor = "red",
-    categories = categories,
-    categoryToGraph = "Total",
+    categories = getCategories("ARR"),
+    categoryToGraph = "Ending ARR",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
+    sheetOrientation = "horizontal",
+    hasTable = True,
+    definitions = definitions
 ).info
 
-data["ARPU"] = Statistic(
+data["ARPA"] = Statistic(
     workbook = wb,
     sheetName = "ARPU",
-    title = "ARPU",
+    title = "ARPA (Avg. Revenue Per Account)",
     prefix = "$",
-    suffix = "M",
-    timescale = "quarters",
+    suffix = "K",
+    timescale = "Monthly",
     dps = 2,
     posColor = "green",
     negColor = "red",
-    categories = categories,
-    categoryToGraph = "Total",
-    prevValueHeaders = prevValuesByQuarter,
+    categories = getCategories("ARPU"),
+    categoryToGraph = "Ending ARPU",
+    prevValueHeaders = prevValuesByMonth,
     isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
+    sheetOrientation = "horizontal",
+    hasTable = True,
+    definitions = definitions
+).info
+
+data["LTV"] = Statistic(
+    workbook = wb,
+    sheetName = "LTV",
+    title = "LTV (Lifetime Value)",
+    prefix = "$",
+    suffix = "K",
+    timescale = "Monthly",
+    dps = 2,
+    posColor = "green",
+    negColor = "red",
+    categories = [["LTV", "black", "black"]],
+    categoryToGraph = "LTV",
+    prevValueHeaders = prevValuesByMonth,
+    isPercentage = False,
+    sheetOrientation = "horizontal",
+    hasTable = False,
+).info
+
+data["CAC"] = Statistic(
+    workbook = wb,
+    sheetName = "CAC",
+    title = "CAC (Customer Acquisition Cost)",
+    prefix = "$",
+    suffix = "K",
+    timescale = "Monthly",
+    dps = 2,
+    posColor = "red",
+    negColor = "green",
+    categories = [["CAC", "black", "black"]],
+    categoryToGraph = "CAC",
+    prevValueHeaders = prevValuesByMonth,
+    isPercentage = False,
+    sheetOrientation = "horizontal",
+    hasTable = False
+).info
+
+data["LTV-CACRatio"] = Statistic(
+    workbook = wb,
+    sheetName = "LTVCAC",
+    title = "LTV-CAC Ratio",
+    prefix = "",
+    suffix = "",
+    timescale = "Monthly",
+    dps = 2,
+    posColor = "green",
+    negColor = "red",
+    categories = [["LTV-CAC Ratio", "black", "black"]],
+    categoryToGraph = "LTV-CAC Ratio",
+    prevValueHeaders = prevValuesByMonth,
+    isPercentage = False,
+    sheetOrientation = "horizontal",
+    hasTable = False
 ).info
 
 data["Customers"] = Statistic(
@@ -118,19 +187,17 @@ data["Customers"] = Statistic(
     title = "Customers",
     prefix = "",
     suffix = "",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 0,
     posColor = "green",
     negColor = "red",
-    categories = categories,
-    categoryToGraph = "Total",
+    categories = getCategories("Customers"),
+    categoryToGraph = "Ending Customers",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
+    sheetOrientation = "horizontal",
+    hasTable = True,
+    definitions = definitions
 ).info
 
 data["Seats"] = Statistic(
@@ -139,19 +206,17 @@ data["Seats"] = Statistic(
     title = "Seats",
     prefix = "",
     suffix = "",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 0,
     posColor = "green",
     negColor = "red",
-    categories = categories,
-    categoryToGraph = "Total",
+    categories = getCategories("Seats"),
+    categoryToGraph = "Ending Seats",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
+    sheetOrientation = "horizontal",
+    hasTable = True,
+    definitions = definitions
 ).info
 
 data["ARRChurnPct"] = Statistic(
@@ -160,18 +225,15 @@ data["ARRChurnPct"] = Statistic(
     title = "ARR Churn Rate",
     prefix = "",
     suffix = "%",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 1,
     posColor = "red",
     negColor = "green",
-    categories = [],
+    categories = [["ARR Churn Rate", "red", "red"]],
+    categoryToGraph = "ARR Churn Rate",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = True,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
+    sheetOrientation = "horizontal"
 ).info
 
 data["SeatChurnPct"] = Statistic(
@@ -180,27 +242,24 @@ data["SeatChurnPct"] = Statistic(
     title = "Seat Churn Rate",
     prefix = "",
     suffix = "%",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 1,
     posColor = "red",
     negColor = "green",
-    categories = [],
+    categories = [["Seats Churn Rate", "red", "red"]],
+    categoryToGraph = "Seats Churn Rate",
     prevValueHeaders = prevValuesByMonth,
     isPercentage = True,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
+    sheetOrientation = "horizontal"
 ).info
 
 data["SAOs"] = Statistic(
     workbook = wb,
     sheetName = "SAOs",
-    title = "SAOs",
+    title = "SAOs (Sales Accepted Opportunities)",
     prefix = "",
     suffix = "",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 0,
     posColor = "green",
     negColor = "red",
@@ -217,10 +276,10 @@ data["SAOs"] = Statistic(
 data["SRLs"] = Statistic(
     workbook = wb,
     sheetName = "SRLs",
-    title = "SRLs",
+    title = "SRLs (Sales Ready Leads)",
     prefix = "",
     suffix = "",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 0,
     posColor = "green",
     negColor = "red",
@@ -234,13 +293,13 @@ data["SRLs"] = Statistic(
     )
 ).info
 
-data["MQLs"] = Statistic(
+"""data["MQLs"] = Statistic(
     workbook = wb,
     sheetName = "MQLs",
-    title = "MQLs",
+    title = "MQLs (Market Qualified Leads)",
     prefix = "",
     suffix = "",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 0,
     posColor = "green",
     negColor = "red",
@@ -252,7 +311,7 @@ data["MQLs"] = Statistic(
         value = "B",
         category = None
     )
-).info
+).info"""
 
 data["NoOfTrialsRequested"] = Statistic(
     workbook = wb,
@@ -260,7 +319,7 @@ data["NoOfTrialsRequested"] = Statistic(
     title = "Number Of Trials Requested",
     prefix = "",
     suffix = "",
-    timescale = "months",
+    timescale = "Monthly",
     dps = 0,
     posColor = "green",
     negColor = "red",
@@ -276,18 +335,59 @@ data["NoOfTrialsRequested"] = Statistic(
 
 data["ARRDetailed"] = dict(
     title = "ARR (Detailed)",
-    timescale = "months",
+    timescale = "Quarterly",
     prefix = "$",
     suffix = "M",
     dps = 2,
-    categories = [],
-    prevValuesHeaders = [],
+    categories = catsForARRDetailed,
+    categoryToGraph = "All",
+    prevValueHeaders = [],
     categoryValues = data["ARR"]["categoryValues"],
-    values = dict(
-        dates = [],
-        values = []
-    ),
-    graphType = "bar"   
+    quarters = data["ARR"]["quarters"],
+    graphType = "bar",
+    definitions = []
+)
+
+data["NPS"] = dict(
+    title = "Net Promoter Score",
+    timescale = "Monthly",
+    prefix = "",
+    suffix = "",
+    dps = 1,
+    categories = [["FY17", None, None]],
+    prevValueHeaders = [],
+    dates = ["FY17"],
+    categoryValues = {
+        "FY17": dict(
+            values = [2.9]
+        )
+    },
+    graphType = "bar",
+    sampleSize = 520,
+    definitions = []
+)
+
+data["NPSSegPct"] = dict(
+    title = "NPS Segment Percent",
+    timescale = "Monthly",
+    prefix = "",
+    suffix = "",
+    dps = 1,
+    categories = [["Promoter", None, None], ["Passive", None, None], ["Detractor", None, None]],
+    prevValueHeaders = [],
+    dates = ["FY17"],
+    categoryValues = {
+        "Promoter": dict(
+            values = [29]
+        ),
+        "Passive": dict(
+            values = [45]
+        ),
+        "Detractor": dict(
+            values = [26]
+        )
+    },
+    graphType = "bar"
 )
 
 # configure application
@@ -415,7 +515,7 @@ def homepage():
 
 @app.route("/stat/<stat>")
 def displayStat(stat):
-    return render_template("drilldown.html", title = data[stat]["title"], stat = stat)
+    return render_template("drilldown.html", title = data[stat]["title"], stat = stat, definitions = data[stat]["definitions"])
 
 @app.route("/data")
 def get_data():

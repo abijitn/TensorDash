@@ -12,19 +12,52 @@
             // display the plot for the given statistic
             makePlot(data, '{{ stat }}');
             // if category data is given, make the table to go below the graph, else hide the table
-            if (data['{{ stat }}']["categories"].length > 0) {
+            if (data['{{ stat }}'].hasTable) {
                 makeTable(data, '{{ stat }}');
+                $(".definitions-wrapper").css({"display": "block"});
+                $("#definitions-tab").click(function() {
+                    $(".definitions-container").css({"display": "block"});
+                    $(".x").css({"display": "block"});
+                });
+                $(".x").click(function() {
+                    $(".definitions-container").css({"display": "none"});
+                    $(".x").css({"display": "none"});
+                });
             } else {
                 $("#categories").css({"display": "none"});
                 $("#scroll").css({"display": "none"});
             }
             // if the graph is a line graph, then previous values should be displayed, else hide the bottom tiles
-            if (data['{{ stat }}']["graphType"] == "line") {
+            if (data['{{ stat }}'].graphType == "line") {
                 for (i = 1; i < 6; i++) {
                     displayBottomTiles(data, '{{ stat }}');
                 }
             } else {
                 $("#prev-values-container").css({"display": "none"});
+            }
+            if (data['{{ stat }}'].categoryToGraph == null) {
+                $("#timescale-dropdown").css({"display": "none"});
+            } else {
+                $("#timescale-dropdown").hover(function() {
+                    $(this).css({"width": "360px"});
+                    $("#timescale-dropdown-options").css({"display": "block"});
+                }, function() {
+                    $(this).css({"width": "75px"});
+                    $("#timescale-dropdown-options").css({"display": "none"});
+                });
+                $("#timescale-dropdown-selected").html(data['{{ stat }}'].timescale);
+                $("#monthly").click(function() {
+                    $("#timescale-dropdown-selected").html("Monthly");
+                    makePlot(data, '{{ stat }}', null, "Monthly");
+                });
+                $("#quarterly").click(function() {
+                    $("#timescale-dropdown-selected").html("Quarterly");
+                    makePlot(data, '{{ stat }}', null, "Quarterly");
+                });
+                $("#yearly").click(function() {
+                    $("#timescale-dropdown-selected").html("Yearly");
+                    makePlot(data, '{{ stat }}', null, "Yearly");
+                });
             }
         });
     });
@@ -32,30 +65,41 @@
 {% endblock %}
 
 {% block backbutton %}
-<a href="/homepage" class="back-button">Back to Dashboard</a>
+<a href="/" class="back-button">Back to Dashboard</a>
 {% endblock %}
 
 {% block main %}
 <div class="main-graph" id="main-graph">
     <div class="current-value" id="current-value"></div>
-    <div id="pct-change"></div>
+    <div id="pct-change-block">
+        <div id="pct-change"></div>
+        <br>
+        <div id="timescale" class="timescale timescale-drilldown"></div>
+    </div>
+    <div class="timescale-dropdown" id="timescale-dropdown">
+        <div class="timescale-dropdown-option option-right" id="timescale-dropdown-selected"></div>
+        <div class="timescale-dropdown-options" id="timescale-dropdown-options">
+            <div class="timescale-dropdown-option option-left" id="monthly">Monthly</div>
+            <div class="timescale-dropdown-option option-left" id="quarterly">Quarterly</div>
+            <div class="timescale-dropdown-option option-left" id="yearly">Yearly</div>
+        </div>
+    </div>
     <div id="plot"></div>
+</div>
+<div class="definitions-wrapper">
+    <div class="definitions-tab" id="definitions-tab">Definitions</div>
+    <div class="definitions-container">
+        <ul>
+            {% for definition in definitions %}
+            <li><div class="category-to-define {{ definition[2] }}">{{ definition[0] }}</div>{{ definition[1] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="x">X</div>
 </div>
 <table id="categories">
     <tr>
         <th>Breakout</th>
-    </tr>
-    <tr>
-        <td>New</td>
-    </tr>
-    <tr>
-        <td>Expansion</td>
-    </tr>
-    <tr>
-        <td>Churn</td>
-    </tr>
-    <tr>
-        <td>Net New</td>
     </tr>
 </table>
 <div id="scroll" class="wrapper">
@@ -65,8 +109,8 @@
 {% for i in [1, 2, 3, 4, 5] %}
     <div class="prev-value" id="pv{{ i }}">
         <br>
-        <span id="pvv{{ i }}" class="pvv"></span>
-        <span id="pvp{{ i }}" class="pvp"></span>
+        <span id="display-value{{ i }}" class="display-value"></span>
+        <span id="display-pct{{ i }}" class="display-pct"></span>
     </div>
 {% endfor %}
 </div>

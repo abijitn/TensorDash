@@ -10,15 +10,29 @@ Tensor Executive Dashboard
 
 {% block main %}
 {% for stat in stats %}
-	<a href="/stat/{{ stat }}">
-		<div class="dash-stat" id="{{ stat }}">
-			<span id="dash-stat-{{ stat }}"></span>
-			<span class="pvp pvp-dash" id="{{ stat }}Change"></span>
-			<br>
-			<span class="pvv pvv-dash" id="{{ stat }}Val"></span>
-			<span class="timescale" id="{{ stat }}Since"></span>
-			<div class="dash-plot" id="{{ stat }}Plot"></div>
-		</div>
-	</a>
+	{% if stat != 'NPSSegPct' %}
+		<a href="/stat/{{ stat }}">
+			<div class="dash-stat" id="{{ stat }}">
+				<div class="dash-stat-left">
+					<span id="dash-stat-{{ stat }}"></span>
+					<br>
+					<span class="display-value display-value-dash" id="{{ stat }}Val"></span>
+				</div>
+				<div class="dash-stat-right">
+					<span class="display-pct display-pct-dash" id="{{ stat }}Change"></span>
+					<br>
+					<span class="timescale timescale-dash" id="{{ stat }}Since"></span>
+				</div>
+				{% if stat != 'NPS' %}
+					<div class="dash-plot" id="{{ stat }}Plot"></div>
+				{% else %}
+					<div class="dash-plot">
+						<div class="dash-plot NPS" id="NPSPlot"></div>
+						<div class="dash-plot NPS" id="NPSSegPctPlot"></div>
+					</div>
+				{% endif %}
+			</div>
+		</a>
+	{% endif %}
 {% endfor %}
 {% endblock %}
