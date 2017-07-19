@@ -343,7 +343,9 @@ data["ARRDetailed"] = dict(
     categoryToGraph = "All",
     prevValueHeaders = [],
     categoryValues = data["ARR"]["categoryValues"],
+    dates = data["ARR"]["dates"],
     quarters = data["ARR"]["quarters"],
+    years = data["ARR"]["years"],
     graphType = "bar",
     definitions = []
 )
