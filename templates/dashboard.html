@@ -1,7 +1,11 @@
 {% extends "index.html" %}
 
+{% block tabTitle %}
+Agile Central Dashboard
+{% endblock %}
+
 {% block title %}
-Tensor Executive Dashboard
+Agile Central Dashboard
 {% endblock %}
 
 {% block script %}
@@ -9,30 +13,23 @@ Tensor Executive Dashboard
 {% endblock %}
 
 {% block main %}
-{% for stat in stats %}
-	{% if stat != 'NPSSegPct' %}
-		<a href="/stat/{{ stat }}">
-			<div class="dash-stat" id="{{ stat }}">
-				<div class="dash-stat-left">
-					<span id="dash-stat-{{ stat }}"></span>
+<div class="dashboard-container">
+	<img src="/static/OperationTensorBanner.jpg" class="banner">
+	{% for metric in metrics %}
+		<a href="/metric/{{ metric }}">
+			<div class="dash-metric" id="{{ metric }}">
+				<div class="dash-metric-left">
+					<span id="dash-metric-{{ metric }}"></span>
 					<br>
-					<span class="display-value display-value-dash" id="{{ stat }}Val"></span>
+					<span class="display-value display-value-dash" id="{{ metric }}Val"></span>
 				</div>
-				<div class="dash-stat-right">
-					<span class="display-pct display-pct-dash" id="{{ stat }}Change"></span>
+				<div class="dash-metric-right">
+					<span class="display-pct display-pct-dash" id="{{ metric }}Change"></span>
 					<br>
-					<span class="timescale timescale-dash" id="{{ stat }}Since"></span>
+					<span class="timescale timescale-dash" id="{{ metric }}Since"></span>
 				</div>
-				{% if stat != 'NPS' %}
-					<div class="dash-plot" id="{{ stat }}Plot"></div>
-				{% else %}
-					<div class="dash-plot">
-						<div class="dash-plot NPS" id="NPSPlot"></div>
-						<div class="dash-plot NPS" id="NPSSegPctPlot"></div>
-					</div>
-				{% endif %}
 			</div>
 		</a>
-	{% endif %}
-{% endfor %}
+	{% endfor %}
+</div>
 {% endblock %}
