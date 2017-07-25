@@ -143,7 +143,7 @@ def health():
     return '', 200
 
 @app.route("/homepage")
-def home():
+def homepage():
     return render_template("dashboard.html", metrics = metrics)
 
 @app.route("/metric/<metric>")
