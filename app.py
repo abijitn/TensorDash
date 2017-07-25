@@ -23,6 +23,7 @@ from data import data, metrics
 app = Flask(__name__)
 
 #SAML2 based SSO - SP and IDP code -----------------------------------------------------------------------
+app.config['SECRET_KEY'] = ',kM3^HJ,a{2S3x~M`gxE8%!HCSnS89q_3H]:Cpv8U%p]8}8V'
 app.config['SAML_PATH'] = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saml')
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=app.config['SAML_PATH'])
@@ -89,7 +90,11 @@ def home():
         if len(session['samlUserdata']) > 0:
             attributes = session['samlUserdata'].items()
 
-    idpresponse = auth.get_last_response_xml()
+    if auth.get_last_response_xml() is not None:
+        idpresponse = auth.get_last_response_xml()
+
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
     xmlstart = '<ns2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">'
     xmlend = '</ns2:NameID>'
@@ -102,12 +107,12 @@ def home():
 #        md = mongo.db['sessions']
 #        md.insert_one({'user': nameid.group(1), 'ts': datetime.datetime.utcnow(), 'destination': 'landing'})
 #        print(nameid.group(1), ' -- ', accesstime.group(1))
-#        session['uid'] = nameid.group(1)
+        session['uid'] = nameid.group(1)
 
         return redirect(url_for('homepage'))
 
     else:
-        return render_template('error.html')
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 @app.route('/attrs/')
 def attrs():
@@ -144,15 +149,24 @@ def health():
 
 @app.route("/homepage")
 def homepage():
-    return render_template("dashboard.html", metrics = metrics)
+    if 'uid' in session:
+        return render_template("dashboard.html", metrics = metrics)
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 @app.route("/metric/<metric>")
 def displayStat(metric):
-    return render_template("drilldown.html", title = data[metric]["title"], metric = metric)
+    if 'uid' in session:
+        return render_template("drilldown.html", title = data[metric]["title"], metric = metric)
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 @app.route("/data")
 def get_data():
-    return jsonify(data)
+    if 'uid' in session:
+            return jsonify(data)
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 context.load_cert_chain('ssl.pem', 'ssl.key')
