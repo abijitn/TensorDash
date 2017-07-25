@@ -138,13 +138,17 @@ def metadata():
         resp = make_response(', '.join(errors), 500)
     return resp
 
-@app.route('/homepage')
-def homepage():
-    return render_template("dashboard.html", stats=stats)
+@app.route('/health/')
+def health():
+    return '', 200
 
-@app.route("/stat/<stat>")
-def displayStat(stat):
-    return render_template("drilldown.html", title = data[stat]["title"], stat = stat, definitions = data[stat]["definitions"])
+@app.route("/homepage")
+def home():
+    return render_template("dashboard.html", metrics = metrics)
+
+@app.route("/metric/<metric>")
+def displayStat(metric):
+    return render_template("drilldown.html", title = data[metric]["title"], metric = metric)
 
 @app.route("/data")
 def get_data():
