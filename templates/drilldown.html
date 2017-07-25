@@ -14,8 +14,12 @@
         var category = find(data['{{ metric }}'].categories, data['{{ metric }}'].mainCategory);
         var value = getValue(category, timescale, 0);
         $("#current-value").html(category.prefix + getFormattedValue(category, value) + category.suffix);
-        displayPctChange(category, 1, "pct-change", timescale);
-        $("#timescale").html("since 1 " + timescale.substring(0, timescale.length - 2) + " ago");
+        var hasPctChange = displayPctChange(category, 1, "pct-change", timescale);
+        if (hasPctChange) {
+            $("#timescale").html("since 1 " + timescale.substring(0, timescale.length - 2) + " ago");
+        } else {
+            $("#current-value").css({"border-right": "none"});
+        }
     }
 
     function onTimeFilterClick(data, metric, timescale) {

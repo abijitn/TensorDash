@@ -62,10 +62,10 @@ class Category:
             yaxis = 1
         )
 
-	def Land(prefix = "", suffix = "", dps = 0, onMainDashboard = False, state = State.OFF, graphType = "line",
+	def New(prefix = "", suffix = "", dps = 0, onMainDashboard = False, state = State.OFF, graphType = "line",
 		definition = dict(text = "Lorem Ipsum", color = Color.LIGHTGREEN)):
 		return dict(
-            name = "Land",
+            name = "New",
             prefix = prefix,
             suffix = suffix,
             posColor = Color.GREEN,
@@ -128,10 +128,10 @@ class Category:
             yaxis = 1
         )
 
-	def Lost(prefix = "", suffix = "", dps = 0, onMainDashboard = False, state = State.OFF, graphType = "line",
+	def Churned(prefix = "", suffix = "", dps = 0, onMainDashboard = False, state = State.OFF, graphType = "line",
 		definition = dict(text = "Lorem Ipsum", color = Color.LIGHTRED)):
 		return dict(
-            name = "Lost",
+            name = "Churned",
             prefix = prefix,
             suffix = suffix,
             posColor = Color.RED,
@@ -383,10 +383,10 @@ data["ARR"] = Metric(
     tileHeaders = prevValuesByMonth,
     categories = CategoryList([
         Category.Starting("ARR", prefix = "$", suffix = "M", dps = 1),
-        Category.Land(prefix = "$", suffix = "M", dps = 1),
+        Category.New(prefix = "$", suffix = "M", dps = 1),
         Category.Expand(prefix = "$", suffix = "M", dps = 1),
         Category.Downgrade(prefix = "$", suffix = "M", dps = 1),
-        Category.Lost(prefix = "$", suffix = "M", dps = 1),
+        Category.Churned(prefix = "$", suffix = "M", dps = 1),
         Category.NetNew(prefix = "$", suffix = "M", dps = 1),
         Category.Ending("ARR", prefix = "$", suffix = "M", dps = 1)
     ])
@@ -405,10 +405,10 @@ data["ARRDetailed"] = Metric(
     hasDefinitions = True,
     hasBottomTiles = False,
     categories = CategoryList([
+        Category.New(prefix = "$", suffix = "M", dps = 1, graphType = "bar", onMainDashboard = True, state = State.ON),
         Category.Expand(prefix = "$", suffix = "M", dps = 1, graphType = "bar", onMainDashboard = True, state = State.ON),
-        Category.Land(prefix = "$", suffix = "M", dps = 1, graphType = "bar", onMainDashboard = True, state = State.ON),
         Category.Downgrade(prefix = "$", suffix = "M", dps = 1, graphType = "bar", onMainDashboard = True, state = State.ON),
-        Category.Lost(prefix = "$", suffix = "M", dps = 1, graphType = "bar", onMainDashboard = True,
+        Category.Churned(prefix = "$", suffix = "M", dps = 1, graphType = "bar", onMainDashboard = True,
                         state = State.ON),
         Category.NetNew(prefix = "$", suffix = "M", dps = 1, onMainDashboard = True, state = State.ON)
     ])
@@ -517,10 +517,10 @@ data["Customers"] = Metric(
     tileHeaders = prevValuesByMonth,
     categories = CategoryList([
         Category.Starting("Customers"),
-        Category.Land(),
+        Category.New(),
         Category.Expand(),
         Category.Downgrade(),
-        Category.Lost(),
+        Category.Churned(),
         Category.NetNew(),
         Category.Ending("Customers")
     ])
@@ -538,10 +538,10 @@ data["Seats"] = Metric(
     tileHeaders = prevValuesByMonth,
     categories = CategoryList([
         Category.Starting("Seats"),
-        Category.Land(),
+        Category.New(),
         Category.Expand(),
         Category.Downgrade(),
-        Category.Lost(),
+        Category.Churned(),
         Category.NetNew(),
         Category.Ending("Seats")
     ])
@@ -611,10 +611,10 @@ data["SeatChurnPct"] = Metric(
 
 data["ARPA"] = Metric(
     workbook = wb,
-    sheetName = "ARPU",
+    sheetName = "ARPA",
     title = "Avg. Revenue Per Account (ARPA)",
     defaultTimescale = "monthly",
-    mainCategory = "Ending ARPU",
+    mainCategory = "Ending ARPA",
     yPrefixes = ["$"],
     ySuffixes = ["K"],
     hasTable = True,
@@ -622,13 +622,13 @@ data["ARPA"] = Metric(
     hasDefinitions = True,
     tileHeaders = prevValuesByMonth,
     categories = CategoryList([
-        Category.Starting("ARPU", prefix = "$", suffix = "K", dps = 0),
-        Category.Land(prefix = "$", suffix = "K", dps = 0),
+        Category.Starting("ARPA", prefix = "$", suffix = "K", dps = 0),
+        Category.New(prefix = "$", suffix = "K", dps = 0),
         Category.Expand(prefix = "$", suffix = "K", dps = 0),
         Category.Downgrade(prefix = "$", suffix = "K", dps = 0),
-        Category.Lost(prefix = "$", suffix = "K", dps = 0),
+        Category.Churned(prefix = "$", suffix = "K", dps = 0),
         Category.NetNew(prefix = "$", suffix = "K", dps = 0),
-        Category.Ending("ARPU", prefix = "$", suffix = "K", dps = 0)
+        Category.Ending("ARPA", prefix = "$", suffix = "K", dps = 0)
     ])
 ).info
 
@@ -648,8 +648,8 @@ data["NoOfTrialsRequested"] = Metric(
 
 data["SAOs"] = Metric(
     workbook = wb,
+    title = "Sales Accepted Opportunities",
     sheetName = "SAOs",
-    title = "SAOs",
     sheetOrientation = "vertical",
     defaultTimescale = "monthly",
     tileHeaders = prevValuesByMonth,
@@ -662,8 +662,8 @@ data["SAOs"] = Metric(
 
 data["SRLs"] = Metric(
     workbook = wb,
+    title = "Sales Ready Leads",
     sheetName = "SRLs",
-    title = "SRLs",
     sheetOrientation = "vertical",
     defaultTimescale = "monthly",
     tileHeaders = prevValuesByMonth,
@@ -807,22 +807,37 @@ data["Usage"] = Metric(
 data["NPS"] = Metric(
     workbook = wb,
     sheetName = "NPS",
-    title = "NPS",
+    title = "Net Promoter Score (NPS)",
     hasTimeOptions = False,
-    mainCategory = None,
+    mainCategory = "NPS",
     defaultTimescale = "yearly",
     hasGraphText = True,
+    ySuffixes = ["%"],
     hasXLabelsOnMainDashboard = True,
     hasBottomTiles = False,
     hasDefinitions = True,
     categories = CategoryList([
+        dict(
+            name = "NPS",
+            prefix = "",
+            suffix = "",
+            isPercentage = False,
+            dps = 1,
+            negate = False,
+            onMainDashboard = False,
+            isValueOnMainDashboard = True,
+            isValueOnDrilldown = True,
+            drilldownGraphColor = Color.DARKBLUE,
+            state = State.OFF,
+            definition = dict(text = "Lorem Ipsum", color = Color.DARKBLUE)
+        ),
         dict(
             name = "Promoter",
             prefix = "",
             suffix = "%",
             posColor = Color.BLACK,
             negColor = Color.BLACK,
-            isPercentage = False,
+            isPercentage = True,
             dps = 1,
             negate = False,
             onMainDashboard = True,
@@ -841,7 +856,7 @@ data["NPS"] = Metric(
             suffix = "%",
             posColor = Color.BLACK,
             negColor = Color.BLACK,
-            isPercentage = False,
+            isPercentage = True,
             dps = 1,
             negate = False,
             onMainDashboard = True,
@@ -860,7 +875,7 @@ data["NPS"] = Metric(
             suffix = "%",
             posColor = Color.BLACK,
             negColor = Color.BLACK,
-            isPercentage = False,
+            isPercentage = True,
             dps = 1,
             negate = False,
             onMainDashboard = True,

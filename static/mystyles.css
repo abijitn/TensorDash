@@ -1,19 +1,34 @@
 body {
-	font: Georgia, sans-serif;
+	font-family: "Averta", Sans-Serif;
 	text-align: center;
-	background-color: #f2f7ff;
+	background-color: #f0f0f2;
 }
 
 .top {
 	width: 100%;
 	min-width: 700px;
 	height: 50px;
-	background-color: #38364b;
+	background-color: #38364d;
 	position: fixed;
 	top: 0px;
 	left: 0px;
 	z-index: 10;
-	font: Georgia, sans-serif;
+	font-family: "Averta", Sans-Serif;
+}
+
+.bottom {
+	width: 100%;
+	min-width: 500px;
+	height: 20%;
+	bottom: 0;
+	background-color: #38364d;
+	padding-top: 30px;
+	padding-bottom: 30px;
+}
+
+.logo {
+	margin: auto;
+	height: 100px;
 }
 
 .back-button {
@@ -27,7 +42,7 @@ body {
 }
 
 .back-button:hover {
-	color: #4f8ff7;
+	color: #1890fc;
 	text-decoration: none;
 }
 
@@ -47,25 +62,50 @@ body {
 	margin-top: 50px;
 	width: auto;
 	padding: 15px;
-	font: Georgia, sans-serif;
+	font-family: "Averta", Sans-Serif;
 }
 
 .dashboard-container {
 	margin-top: 50px;
 	margin-left: auto;
 	margin-right: auto;
+	margin-bottom: 20px;
 	padding-top: 15px;
 	padding-bottom: 15px;
 	padding-left: 40px;
 	padding-right: 0px;
 	width: 1320px;
-	height: 100%;
-	font: Georgia, sans-serif;
+	font: "Averta", Sans-Serif;
 }
 
 .banner {
 	width: 1240px;
 	margin-right: 40px;
+}
+
+@media screen and (min-width: 2010px) {
+	.banner {
+		width: 1880px;
+		margin-right: 40px;
+	}
+	.dashboard-container {
+		width: 1960px;
+	}
+	.bottom {
+		height: 20%;
+	}
+}
+
+@media screen and (min-width: 2650px) {
+	.banner {
+		width: 2520px;
+	}
+	.dashboard-container {
+		width: 2600px;
+	}
+	.bottom {
+		height: 20%;
+	}
 }
 
 .current-value {
@@ -97,7 +137,7 @@ body {
 	height: 550px;
 	min-width: 1000px;
 	margin-top: 15px;
-	border-radius: 7px;
+	border-radius: 2px;
 	background-color: #FFFFFF;
 	margin-bottom: 15px;
 	overflow-x: scroll;
@@ -115,7 +155,7 @@ body {
 
 .breakout-table {
 	width: inherit;
-	border-radius: 7px;
+	border-radius: 2px;
 }
 
 .prev-values-container {
@@ -136,7 +176,7 @@ body {
 	font-size: 17px;
 	font-weight: bold;
 	background-color: #FFFFFF;
-	border-radius: 7px;
+	border-radius: 2px;
 	float: left;
 	box-shadow: 0px 0px 10px #d1d1d1;
 }
@@ -152,8 +192,8 @@ body {
 	position: absolute;
 	z-index: 1;
 	background-color: white;
-	border-bottom-left-radius: 7px;
-	border-top-left-radius: 7px;
+	border-bottom-left-radius: 2px;
+	border-top-left-radius: 2px;
 	box-shadow: 0px 0px 10px #d1d1d1;
 }
 
@@ -187,8 +227,8 @@ td {
 	margin-left: 150px;
 	margin-right: 0px;
 	overflow-x: scroll;
-	border-top-right-radius: 7px;
-	border-bottom-right-radius: 7px;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
 	box-shadow: 0px 0px 10px #d1d1d1;
 }
 
@@ -197,8 +237,8 @@ td {
 	background-color: white;
 	left: 165px;
 	table-layout: fixed;
-	border-top-right-radius: 7px;
-	border-bottom-right-radius: 7px;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
 }
 
 .dash-metric {
@@ -207,7 +247,7 @@ td {
 	margin-top: 20px;
 	width: 600px;
 	height: 300px;
-	border-radius: 7px;
+	border-radius: 2px;
 	background-color: white;
 	box-shadow: 0px 0px 10px #d1d1d1;
 	padding-top: 10px;
@@ -217,21 +257,28 @@ td {
 	font-size: 21px;
 	font-weight: bold;
 	color: black;
+	overflow: hidden;
 }
 
 .dash-metric-left {
 	float: left;
+	max-width: 350px;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .dash-metric-right {
 	float: right;
+	max-width: 200px;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .dash-plot {
 	margin-left: -10px;
 	height: 190px;
 	width: 570px;
-	overflow-x: scroll;
+	overflow-x: hidden;
 }
 
 .split-tile {
@@ -288,7 +335,7 @@ td {
 	box-shadow: 0px 0px 10px #d1d1d1;
 	font-weight: normal;
 	font-size: 15px;
-	border-radius: 7px;
+	border-radius: 2px;
 	float: left;
 	margin-right: 10px;
 }
@@ -299,7 +346,7 @@ td {
 	overflow-y: scroll;
 	background-color: white;
 	box-shadow: 0px 0px 10px #d1d1d1;
-	border-radius: 7px;
+	border-radius: 2px;
 	display: none;
 	position: relative;
 	top: -210;
@@ -354,7 +401,7 @@ td {
 	text-align: center;
 	padding: 0px;
 	height: 75px;
-	border-radius: 7px;
+	border-radius: 2px;
 	border: 1px solid #d1d1d1;
 	background-color: white;
 	z-index: 5;
@@ -411,7 +458,7 @@ li:last-child {
 .category-to-define {
 	padding-left: 5px;
 	padding-right: 5px;
-	border-radius: 7px;
+	border-radius: 2px;
 	color: white;
 	margin-right: 10px;
 	min-width: 75px;
@@ -447,7 +494,7 @@ li:last-child {
 	margin-top: 5px;
 	margin-bottom: 5px;
 	margin-right: 5px;
-	border-radius: 7px;
+	border-radius: 2px;
 	background-color: white;
 	box-shadow: 0px 0px 10px #d1d1d1;
 }

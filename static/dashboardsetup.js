@@ -16,8 +16,10 @@ $(document).ready(function() {
 				if (data[metric].defaultTimescale == "quarterly") {
 					stepsBack = 1;
 				}
-				displayPctChange(category, stepsBack, metric + "Change", data[metric].defaultTimescale);
-				$("#" + metric + "Since").html("since 3 months ago");
+				var hasPctChange = displayPctChange(category, stepsBack, metric + "Change", data[metric].defaultTimescale);
+				if (hasPctChange) {
+					$("#" + metric + "Since").html("since 3 months ago");
+				}
 			}
 			$("#dash-metric-" + metric).html(data[metric].title);
 			$("#" + metric).append("<div class='dash-plot' id='" + metric + "Plot'></div>")

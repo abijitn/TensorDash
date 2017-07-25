@@ -43,7 +43,7 @@ function displayPctChange(category, stepsBack, divID, timescale) {
     var currentValue = getValue(category, timescale, 0);
     var prevValue = getValue(category, timescale, stepsBack);
     if (currentValue == null || prevValue == null) {
-        return;
+        return false;
     }
     if (category.isPercentage) {
         pctChange = (currentValue - prevValue) / 100;
@@ -57,6 +57,7 @@ function displayPctChange(category, stepsBack, divID, timescale) {
         $("#" + divID).html("&#9660;" + (pctChange * 100).toFixed(1) + "%")
         $("#" + divID).css({"color": category.negColor})
     }
+    return true;
 }
 
 function displayBottomTiles(data, metric) {
@@ -111,13 +112,14 @@ function makeTraces(data, metric, timescale, destination) {
             color = category.drilldownGraphColor;
             visible = category.state;
         }
+        var ysFormatted = ys.map(y => category.prefix + getFormattedValue(category, y) + category.suffix);
         var trace = {
             x: xs,
             y: ys,
             name: category.name,
             type: category.graphType,
             hoverinfo: "text",
-            hovertext: ys.map(y => category.prefix + getFormattedValue(category, y) + category.suffix),
+            hovertext: ysFormatted,
             line: {
                 width: 7,
                 color: color
@@ -131,7 +133,7 @@ function makeTraces(data, metric, timescale, destination) {
             trace.yaxis = "y" + category.yaxis;
         }
         if (data[metric].hasGraphText) {
-            trace.text = ys.map(x => category.prefix + x + category.suffix);
+            trace.text = ysFormatted;
             trace.textposition = "auto";  
             trace.textfont = {
                 color: "white"
