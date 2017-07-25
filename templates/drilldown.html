@@ -1,73 +1,229 @@
 {% extends "index.html" %}
 
+{% block tabTitle %}
+{{ title }}
+{% endblock %}
+
 {% block title %}
 {{ title }}
 {% endblock %}
 
 {% block script %}
-<script>
+<script> 
+    function setValueAndPercentDisplay(data, metric, timescale) {
+        var category = find(data['{{ metric }}'].categories, data['{{ metric }}'].mainCategory);
+        var value = getValue(category, timescale, 0);
+        $("#current-value").html(category.prefix + getFormattedValue(category, value) + category.suffix);
+        var hasPctChange = displayPctChange(category, 1, "pct-change", timescale);
+        if (hasPctChange) {
+            $("#timescale").html("since 1 " + timescale.substring(0, timescale.length - 2) + " ago");
+        } else {
+            $("#current-value").css({"border-right": "none"});
+        }
+    }
+
+    function onTimeFilterClick(data, metric, timescale) {
+        $("#timescale-options .option-selected").removeClass("option-selected");
+        $("#" + timescale).addClass("option-selected");
+        if (data[metric].mainCategory) {
+            setValueAndPercentDisplay(data, metric, timescale)
+        }
+        makeDrilldownPlot(data, metric, timescale);
+    }
+
+    function attachOnCategoryFilterClick(data, metric, category, id) {
+        $("#" + id).click(function() {
+            if ($("#" + id).hasClass("option-selected")) {
+                $("#" + id).removeClass("option-selected");
+            } else {
+                $("#" + id).addClass("option-selected");
+            }
+            toggleTrace(data, metric, category);
+        });
+    }
+
     $(document).ready(function() {
         // get the data from the server
         $.getJSON("/data").done(function(data) {
             // display the plot for the given statistic
-            makePlot(data, '{{ stat }}');
+            makeDrilldownPlot(data, '{{ metric }}', data['{{ metric }}'].defaultTimescale);
+            if (data['{{ metric }}'].hasDefinitions) {
+                toggleOn(".definitions-wrapper", "block");
+                for (cat = 0; cat < data['{{ metric }}'].categories.length; cat++) {
+                    $("#definitions-list").append(
+                        "<li>" + 
+                        "<div class='category-to-define' style='background-color: " 
+                        + data['{{ metric }}'].categories[cat].drilldownGraphColor +
+                        "'>" + data['{{ metric }}'].categories[cat].name + "</div>" +
+                        data['{{ metric }}'].categories[cat].definition.text +
+                        "</li>"
+                    );
+                }
+                $("#definitions-tab").click(function() {
+                    toggleOn(".definitions-container", "block");
+                });
+                $("#x-def").click(function() {
+                    toggleOff(".definitions-container");
+                });
+            }
             // if category data is given, make the table to go below the graph, else hide the table
-            if (data['{{ stat }}']["categories"].length > 0) {
-                makeTable(data, '{{ stat }}');
+            if (data['{{ metric }}'].hasTable) {
+                makeTable(data, '{{ metric }}');
             } else {
-                $("#categories").css({"display": "none"});
-                $("#scroll").css({"display": "none"});
+                toggleOff(".breakout-table");
             }
             // if the graph is a line graph, then previous values should be displayed, else hide the bottom tiles
-            if (data['{{ stat }}']["graphType"] == "line") {
-                for (i = 1; i < 6; i++) {
-                    displayBottomTiles(data, '{{ stat }}');
+            if (data['{{ metric }}'].hasBottomTiles) {
+                for (i = 0; i < 5; i++) {
+                    displayBottomTiles(data, '{{ metric }}');
                 }
             } else {
-                $("#prev-values-container").css({"display": "none"});
+                toggleOff("#prev-values-container");
             }
+
+            if (!data['{{ metric }}'].hasCategoryFilters) {
+                $("#toggle-categories").removeClass("selectable");
+                $("#toggle-categories").addClass("non-selectable");
+            } else {
+                $("#toggle-categories").click(function() {
+                    toggleOn("#category-options", "block");
+                    toggleOff("#timescale-options");
+                });
+                $("#x-categories").click(function() {
+                    toggleOff("#category-options");
+                });
+                var length = data['{{ metric }}'].categories.length;
+                var height = length * 25 + "px";
+                $("#category-options").css({"height": height});
+                for (i = 0; i < data['{{ metric }}'].categories.length; i++) {
+                    var category = data['{{ metric }}'].categories[i];
+                    var id = category.name.split(" ").join("-") + "-filter";
+                    $("#category-options").append(
+                        "<li class='filter-option' id='" + id + "'>" + 
+                        category.name + 
+                        "</div>"
+                    );
+                    attachOnCategoryFilterClick(data, '{{ metric }}', category, id);
+                    if (category.state) {
+                        $("#" + id).addClass("option-selected");
+                    }
+                }
+            }
+
+            if (!data['{{ metric }}'].hasTimeOptions) {
+                $("#choose-timescale").removeClass("selectable");
+                $("#choose-timescale").addClass("non-selectable");
+            } else {
+                $("#choose-timescale").click(function() {
+                    toggleOn("#timescale-options", "block");
+                    toggleOff("#category-options");
+                });
+                $("#x-timescale").click(function() {
+                    toggleOff("#timescale-options");
+                });
+                $("#" + data['{{ metric }}'].defaultTimescale).addClass("option-selected");
+                $("#monthly").click(function() {
+                    onTimeFilterClick(data, '{{ metric }}', "monthly");
+                });
+                $("#quarterly").click(function() {
+                    onTimeFilterClick(data, '{{ metric }}', "quarterly");
+                });
+                $("#yearly").click(function() {
+                    onTimeFilterClick(data, '{{ metric }}', "yearly");
+                });
+            }
+
+            if (data['{{ metric }}'].mainCategory) {
+                setValueAndPercentDisplay(data, '{{ metric }}', data['{{ metric }}'].defaultTimescale);
+            }
+            $(".print-button").click(function() {
+                var plot = $("#plot");
+                var initialWidth = plot.css("width");
+                plot.css({"width": "1000px"});
+                makeDrilldownPlot(
+                    data, 
+                    '{{ metric }}', 
+                    $("#timescale-options .option-selected").attr("id") || data['{{ metric }}'].defaultTimescale
+                );
+                window.print();
+                plot.css({"width": initialWidth});
+                makeDrilldownPlot(
+                    data, 
+                    '{{ metric }}', 
+                    $("#timescale-options .option-selected").attr("id") || data['{{ metric }}'].defaultTimescale
+                );
+            });
+            $("#resize").click(function() {
+                $("#plot").css({"width": "inherit"});
+                makeDrilldownPlot(
+                    data, 
+                    '{{ metric }}', 
+                    $("#timescale-options .option-selected").attr("id") || data['{{ metric }}'].defaultTimescale
+                );
+            });
         });
     });
 </script>
 {% endblock %}
 
 {% block backbutton %}
-<a href="/homepage" class="back-button">Back to Dashboard</a>
+<a href="/" class="back-button">Back to Dashboard</a>
 {% endblock %}
 
 {% block main %}
-<div class="main-graph" id="main-graph">
-    <div class="current-value" id="current-value"></div>
-    <div id="pct-change"></div>
-    <div id="plot"></div>
-</div>
-<table id="categories">
-    <tr>
-        <th>Breakout</th>
-    </tr>
-    <tr>
-        <td>New</td>
-    </tr>
-    <tr>
-        <td>Expansion</td>
-    </tr>
-    <tr>
-        <td>Churn</td>
-    </tr>
-    <tr>
-        <td>Net New</td>
-    </tr>
-</table>
-<div id="scroll" class="wrapper">
-    <table id="category-data"></table>
-</div>
-<div class="prev-values-container" id="prev-values-container">
-{% for i in [1, 2, 3, 4, 5] %}
-    <div class="prev-value" id="pv{{ i }}">
-        <br>
-        <span id="pvv{{ i }}" class="pvv"></span>
-        <span id="pvp{{ i }}" class="pvp"></span>
+<div class="container">
+    <h1 id="print-header">{{ title }}</h1>
+    <div class="main-graph" id="main-graph">
+        <div class="current-value" id="current-value"></div>
+        <div id="pct-change-block">
+            <div id="pct-change"></div>
+            <br>
+            <div id="timescale" class="timescale timescale-drilldown"></div>
+        </div>
+        <div class="filter-container">
+            <ul class="filter-options">
+                <li class="filter-option selectable" id="choose-timescale">Choose Timescale</li>
+                <li class="filter-option selectable" id="toggle-categories">Toggle Categories</li>
+                <li class="filter-option selectable" id="resize">Resize Graph</li>
+            </ul>
+            <ul class="filter-options drop-filter-options filter-time" id="timescale-options">
+                <li class="filter-option" id="monthly">Monthly</li>
+                <li class="filter-option" id="quarterly">Quarterly</li>
+                <li class="filter-option" id="yearly">Yearly</li>
+                <div class="x x-filter" id="x-timescale">X</div>
+            </ul>
+            <ul class="filter-options drop-filter-options filter-categories" id="category-options">
+                <div class="x x-filter" id="x-categories">X</div>
+            </ul>
+        </div>
+        <div id="plot"></div>
     </div>
-{% endfor %}
+    <div class="definitions-wrapper">
+        <div class="definitions-tab" id="definitions-tab">Definitions</div>
+        <div class="definitions-container">
+            <ul id="definitions-list">
+            </ul>
+            <div class="x" id="x-def">X</div>
+        </div>
+    </div>
+    <div class="breakout-table">
+        <table id="categories">
+            <tr>
+                <th>Breakout</th>
+            </tr>
+        </table>
+        <div id="scroll" class="wrapper">
+            <table id="category-data"></table>
+        </div>
+    </div>
+    <div class="prev-values-container" id="prev-values-container">
+    {% for i in [0, 1, 2, 3, 4] %}
+        <div class="prev-value" id="pv{{ i }}">
+            <br>
+            <span id="display-value{{ i }}" class="display-value"></span>
+            <span id="display-pct{{ i }}" class="display-pct"></span>
+        </div>
+    {% endfor %}
+    </div>
 </div>
 {% endblock %}

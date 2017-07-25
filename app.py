@@ -17,283 +17,13 @@ import uuid
 import random
 import os
 import ssl
-from data import Statistic
-
-
-# the dictionary that will be sent to the webpage
-data = dict()
-
-categories = [
-    "New",
-    "Expansion",
-    "Churn",
-    "Net New"
-]
-
-prevValuesByMonth = [
-    "Current",
-    "1 Month Ago",
-    "3 Months Ago",
-    "6 Months Ago",
-    "1 Year Ago"
-]
-
-prevValuesByQuarter = [
-    "Current",
-    "1 Quarter Ago",
-    "2 Quarters Ago",
-    "3 Quarters Ago",
-    "1 Fiscal Year Ago"
-]
-
-# open the excel file
-wb = openpyxl.load_workbook("TensorDashboardData.xlsx")
-
-"""THIS LIST CONTROLS THE TILES DISPLAYED ON THE WEBSITE. THE NAMES HERE
-SHOULD MATCH THE DICTIONARY KEYS AND RESPECTIVE SHEET NAMES EXACTLY. IN ORDER
-TO ADD A NEW METRIC TO THE SITE, ADD THE NAME TO THE STATS LIST AND INITIALIZE
-A NEW STATISTIC OBJECT AS DEMONSTRATED BELOW."""
-stats = [
-    "ARR",
-    "ARRDetailed",
-    "Seats",
-    "Customers",
-    "ARRChurnPct",
-    "SeatChurnPct",
-    "SAOs",
-    "SRLs",
-    "MQLs",
-    "NoOfTrialsRequested",
-]
-
-
-data["ARR"] = Statistic(
-    workbook = wb,
-    sheetName = "ARR",
-    title = "ARR",
-    associatedStat = "ARRTotal",
-    associatedStatSheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    ),
-    prefix = "$",
-    suffix = "M",
-    timescale = "months",
-    dps = 2,
-    posColor = "green",
-    negColor = "red",
-    categories = categories,
-    categoryToGraph = None,
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
-).info
-
-data["Customers"] = Statistic(
-    workbook = wb,
-    sheetName = "Customers",
-    title = "Customers",
-    associatedStat = "CustomerTotal",
-    associatedStatSheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    ),
-    prefix = "",
-    suffix = "",
-    timescale = "months",
-    dps = 0,
-    posColor = "green",
-    negColor = "red",
-    categories = categories,
-    categoryToGraph = None,
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
-).info
-
-data["Seats"] = Statistic(
-    workbook = wb,
-    sheetName = "Seats",
-    title = "Seats",
-    associatedStat = "SeatsTotal",
-    associatedStatSheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    ),
-    prefix = "",
-    suffix = "",
-    timescale = "months",
-    dps = 0,
-    posColor = "green",
-    negColor = "red",
-    categories = categories,
-    categoryToGraph = None,
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        category = "B",
-        value = "C"
-    )
-).info
-
-data["ARRChurnPct"] = Statistic(
-    workbook = wb,
-    sheetName = "ARRChurnPct",
-    title = "ARR Churn Rate",
-    associatedStat = None,
-    prefix = "",
-    suffix = "%",
-    timescale = "months",
-    dps = 1,
-    posColor = "red",
-    negColor = "green",
-    categories = [],
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = True,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
-).info
-
-data["SeatChurnPct"] = Statistic(
-    workbook = wb,
-    sheetName = "SeatChurnPct",
-    title = "Seat Churn Rate",
-    associatedStat = None,
-    prefix = "",
-    suffix = "%",
-    timescale = "months",
-    dps = 1,
-    posColor = "red",
-    negColor = "green",
-    categories = [],
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = True,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
-).info
-
-data["SAOs"] = Statistic(
-    workbook = wb,
-    sheetName = "SAOs",
-    title = "SAOs",
-    associatedStat = None,
-    prefix = "",
-    suffix = "",
-    timescale = "months",
-    dps = 0,
-    posColor = "green",
-    negColor = "red",
-    categories = [],
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
-).info
-
-data["SRLs"] = Statistic(
-    workbook = wb,
-    sheetName = "SRLs",
-    title = "SRLs",
-    associatedStat = None,
-    prefix = "",
-    suffix = "",
-    timescale = "months",
-    dps = 0,
-    posColor = "green",
-    negColor = "red",
-    categories = [],
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
-).info
-
-data["MQLs"] = Statistic(
-    workbook = wb,
-    sheetName = "MQLs",
-    title = "MQLs",
-    associatedStat = None,
-    prefix = "",
-    suffix = "",
-    timescale = "months",
-    dps = 0,
-    posColor = "green",
-    negColor = "red",
-    categories = [],
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
-).info
-
-data["NoOfTrialsRequested"] = Statistic(
-    workbook = wb,
-    sheetName = "NoOfTrialsRequested",
-    title = "Number Of Trials Requested",
-    associatedStat = None,
-    prefix = "",
-    suffix = "",
-    timescale = "months",
-    dps = 0,
-    posColor = "green",
-    negColor = "red",
-    categories = [],
-    prevValueHeaders = prevValuesByMonth,
-    isPercentage = False,
-    sheetColumns = dict(
-        date = "A",
-        value = "B",
-        category = None
-    )
-).info
-
-data["ARRDetailed"] = dict(
-    title = "ARR (Detailed)",
-    timescale = "months",
-    prefix = "$",
-    suffix = "M",
-    dps = 2,
-    categories = [],
-    prevValuesHeaders = [],
-    categoryValues = data["ARR"]["categoryValues"],
-    values = dict(
-        dates = [],
-        values = []
-    ),
-    graphType = "bar"   
-)
+from data import data, metrics
 
 # configure application
 app = Flask(__name__)
 
 #SAML2 based SSO - SP and IDP code -----------------------------------------------------------------------
+app.config['SECRET_KEY'] = ',kM3^HJ,a{2S3x~M`gxE8%!HCSnS89q_3H]:Cpv8U%p]8}8V'
 app.config['SAML_PATH'] = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saml')
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=app.config['SAML_PATH'])
@@ -360,7 +90,11 @@ def home():
         if len(session['samlUserdata']) > 0:
             attributes = session['samlUserdata'].items()
 
-    idpresponse = auth.get_last_response_xml()
+    if auth.get_last_response_xml() is not None:
+        idpresponse = auth.get_last_response_xml()
+
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
     xmlstart = '<ns2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">'
     xmlend = '</ns2:NameID>'
@@ -373,12 +107,12 @@ def home():
 #        md = mongo.db['sessions']
 #        md.insert_one({'user': nameid.group(1), 'ts': datetime.datetime.utcnow(), 'destination': 'landing'})
 #        print(nameid.group(1), ' -- ', accesstime.group(1))
-#        session['uid'] = nameid.group(1)
+        session['uid'] = nameid.group(1)
 
         return redirect(url_for('homepage'))
 
     else:
-        return render_template('error.html')
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 @app.route('/attrs/')
 def attrs():
@@ -409,17 +143,30 @@ def metadata():
         resp = make_response(', '.join(errors), 500)
     return resp
 
-@app.route('/homepage')
-def homepage():
-    return render_template("dashboard.html", stats=stats)
+@app.route('/health/')
+def health():
+    return '', 200
 
-@app.route("/stat/<stat>")
-def displayStat(stat):
-    return render_template("drilldown.html", title = data[stat]["title"], stat = stat)
+@app.route("/homepage")
+def homepage():
+    if 'uid' in session:
+        return render_template("dashboard.html", metrics = metrics)
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
+
+@app.route("/metric/<metric>")
+def displayStat(metric):
+    if 'uid' in session:
+        return render_template("drilldown.html", title = data[metric]["title"], metric = metric)
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 @app.route("/data")
 def get_data():
-    return jsonify(data)
+    if 'uid' in session:
+            return jsonify(data)
+    else:
+        return redirect("https://samlgwsm-qa.ca.com/affwebservices/public/saml2sso?SPID=UserTensor", code=302)
 
 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 context.load_cert_chain('ssl.pem', 'ssl.key')

@@ -1,187 +1,279 @@
-// format a value with commas if it's a whole number, or with the specified number of decimal points
-function getFormattedValue(data, stat, value) {
-    if (data[stat]["dps"] == 0) {
-        return value.toLocaleString();
+function toggleOn(selector, displayStyle) {
+    $(selector).css({"display": displayStyle});
+}
+
+function toggleOff(selector) {
+    $(selector).css({"display": "none"});
+}
+
+function find(categories, name) {
+    return categories.find(x => x.name == name);
+}
+
+function getFormattedValue(category, value) {
+    if (category.dps == 0) {
+        value = value.toLocaleString();
+        return value.split(".")[0];
     } else {
-        return value.toFixed(data[stat]["dps"]);
+        return value.toFixed(category.dps);
     }
 }
 
-// display the percent change of a stat, colored correctly and with the proper arrow
-function displayPctChange(data, stat, currentValue, stepsBack, divID) {
-    var valuesLength = data[stat]["values"]["dates"].length;
-    var prevValue = data[stat]["values"]["values"][valuesLength - 1 - stepsBack];
-    var pctChange = (currentValue - prevValue) / Math.abs(prevValue);
+function getCategoryValuesByTimescale(category, timescale) {
+    if (timescale == "monthly") {
+        return category.mValues;
+    } else if (timescale == "quarterly") {
+        return category.qValues;
+    } else if (timescale == "yearly") {
+        return category.yValues;
+    }
+}
+
+function getValue(category, timescale, stepsBack) {
+    var values = getCategoryValuesByTimescale(category, timescale);
+    if (stepsBack >= values.length) {
+        return null;
+    } else {
+        return values[values.length - 1 - stepsBack];
+    }
+}
+
+function displayPctChange(category, stepsBack, divID, timescale) {
+    var pctChange;
+    var currentValue = getValue(category, timescale, 0);
+    var prevValue = getValue(category, timescale, stepsBack);
+    if (currentValue == null || prevValue == null) {
+        return false;
+    }
+    if (category.isPercentage) {
+        pctChange = (currentValue - prevValue) / 100;
+    } else {
+        pctChange = (currentValue - prevValue) / Math.abs(prevValue);
+    }
     if (pctChange >= 0) {
-        $("#" + divID).html("&#9650; " + (pctChange * 100).toFixed(2) + "%")
-        $("#" + divID).css({"color": data[stat]["posColor"]});
+        $("#" + divID).html("&#9650; " + (pctChange * 100).toFixed(1) + "%")
+        $("#" + divID).css({"color": category.posColor});
     } else {
-        $("#" + divID).html("&#9660;" + (pctChange * 100).toFixed(2) + "%")
-        $("#" + divID).css({"color": data[stat]["negColor"]})
+        $("#" + divID).html("&#9660;" + (pctChange * 100).toFixed(1) + "%")
+        $("#" + divID).css({"color": category.negColor})
     }
+    return true;
 }
 
-// display the bottom tiles that display previous values
-function displayBottomTiles(data, stat) {
+function displayBottomTiles(data, metric) {
     var indices = [];
-    var timescale = data[stat]["timescale"];
-    if (timescale == "months") {
-        indices = [0, 1, 3, 6, 12];
-    } else if (timescale == "quarters" || timescale == "weeks") {
+    var timescale = data[metric].defaultTimescale;
+    var category = find(data[metric].categories, data[metric].mainCategory);
+    if (timescale == "monthly") {
+        indices = [0, 3, 6, 9, 12];
+    } else if (timescale == "quarterly") {
         indices = [0, 1, 2, 3, 4];
     }
-    var valuesLength = data[stat]["values"]["dates"].length;
-    var currentValue = data[stat]["values"]["values"][valuesLength - 1];
-    // calculate and display the respective previous values as determined by timescale
     for (i = 0; i < 5; i++) {
-        $("#pv" + (i + 1)).prepend(
-            "<span>" + data[stat]["prevValueHeaders"][i] + "</span>"
+        $("#pv" + i).prepend(
+            "<span>" + data[metric].tileHeaders[i] + "</span>"
         );
-        if (valuesLength - (indices[i] + 1) >= 0) {
-            var value = data[stat]["values"]["values"][valuesLength - (indices[i] + 1)];
-            $("#pvv" + (i + 1)).html(
-                data[stat]["prefix"] + 
-                getFormattedValue(data, stat, value) + 
-                data[stat]["suffix"]
-            );
+        var value = getValue(category, timescale, indices[i]);
+        if (value != null) {
+            $("#display-value" + i).html(
+                category.prefix + 
+                getFormattedValue(category, value) + 
+                category.suffix
+            ); 
             if (i > 0) {
-                displayPctChange(data, stat, currentValue, indices[i], "pvp" + (i + 1));
+                displayPctChange(category, indices[i], "display-pct" + i, timescale);
             }
         }
     }
 }
 
-// makePlot, unsurprisingly, uses plotly js to plot the given data in div plotDiv
-function makePlot(data, stat, plotDiv) {
-    // will hold the data to be graphed
-    var graphData = [];
-    var prefix = data[stat]["prefix"];
-    var suffix = data[stat]["suffix"];
-    // specifies the layout/styling of the graph
+function makeTraces(data, metric, timescale, destination) {
+    var traces = [];
+    for (i = 0; i < data[metric].categories.length; i++) {
+        var category = data[metric].categories[i];
+        var xs = [];
+        var ys = [];
+        if (timescale == "monthly") {
+            xs = data[metric].months;
+            ys = category.mValues;
+        } else if (timescale == "quarterly") {
+            xs = data[metric].quarters;
+            ys = category.qValues;
+        } else if (timescale == "yearly") {
+            xs = data[metric].years;
+            ys = category.yValues;
+        }
+        var color;
+        var visible;
+        if (destination == "dashboard") {
+            color = category.mainDashGraphColor;
+            visible = category.onMainDashboard;
+        } else if (destination == "drilldown") {
+            color = category.drilldownGraphColor;
+            visible = category.state;
+        }
+        var ysFormatted = ys.map(y => category.prefix + getFormattedValue(category, y) + category.suffix);
+        var trace = {
+            x: xs,
+            y: ys,
+            name: category.name,
+            type: category.graphType,
+            hoverinfo: "text",
+            hovertext: ysFormatted,
+            line: {
+                width: 7,
+                color: color
+            },
+            marker: {
+                color: color
+            },
+            visible: visible
+        };
+        if (category.yaxis > 1) {
+            trace.yaxis = "y" + category.yaxis;
+        }
+        if (data[metric].hasGraphText) {
+            trace.text = ysFormatted;
+            trace.textposition = "auto";  
+            trace.textfont = {
+                color: "white"
+            };
+        }
+        traces.push(trace);
+    }
+    return traces;
+}
+
+function makeDashboardPlot(data, metric, plotDiv) {
+    var timescale = data[metric].defaultTimescale;
     var layout = {
         paper_bgcolor: "rgba(0,0,0,0)",
         plot_bgcolor: "rgba(0,0,0,0)",
-        yaxis: {
-            tickprefix: prefix,
-            ticksuffix: suffix
+        xaxis: {
+            showticklabels: data[metric].hasXLabelsOnMainDashboard,
+            showgrid: false,
+            showline: false,
+            zeroline: false
         },
-        xaxis: {}
-    };
-    // if the data should be displayed as a line graph
-    if (data[stat]["graphType"] == "line") {
-        var colLT = data[stat]["negColor"];
-        var colGT = data[stat]["posColor"];
-        var dps = data[stat]["dps"];
-        var timescale = data[stat]["timescale"];
-        var valuesLength = data[stat]["values"]["values"].length;
-        var currentValue = data[stat]["values"]["values"][valuesLength - 1];
-        // show the current value at the top
-        $("#current-value").html(prefix + getFormattedValue(data, stat, currentValue) + suffix);
-        // show the percent change at the top
-        displayPctChange(data, stat, currentValue, 1, "pct-change", "green", "red");
-        // fill graphData appropriately
-        graphData = [{
-            x: data[stat]["values"]["dates"],
-            y: data[stat]["values"]["values"],
-            mode: 'line',
-            type: 'scatter',
-            line: {
-                width: 7,
-                color: "#4f8ff7"
+        legend: {
+            font: {
+                size: 9
             }
-        }];
-    // if the data should be displayed as a bar graph
-    } else if (data[stat]["graphType"] == "bar") {
-        // iterate over the metric's categories
-        for (var category in data[stat]["categoryValues"]) {
-            var dates = []
-            var values = []
-            // increment counter by 3 each time, so graph is by quarters instead of months
-            for (i = 0; i < data[stat]["categoryValues"][category]["dates"].length; i += 3) {
-                if (i < data[stat]["categoryValues"][category]["dates"].length) {
-                    dates.push(data[stat]["categoryValues"][category]["dates"][i]);
-                    values.push(data[stat]["categoryValues"][category]["values"][i]);
-                }
-            }
-            var trace = {
-                x: dates,
-                y: values,
-                type: "bar",
-                name: category
-            }
-            // add data to graphData
-            graphData.push(trace);
-        }
-        // tell the bar graph to stack
-        layout["barmode"] = "relative";
-    }
-    // if plotDiv was specified, then the graph will be on the dashboard instead of the drilldown; change the color if necessary and hide the axes
-    if (plotDiv) {
-        if (data[stat]["graphType"] == "line") {
-            graphData[0]["line"]["color"] = "#e2edff";
-        }
-        layout["xaxis"]["showgrid"] = false;
-        layout["xaxis"]["showline"] = false;
-        layout["xaxis"]["zeroline"] = false;
-        layout["xaxis"]["showticklabels"] = false;
-        layout["yaxis"]["showgrid"] = false;
-        layout["yaxis"]["showline"] = false;
-        layout["yaxis"]["zeroline"] = false;
-        layout["yaxis"]["showticklabels"] = false;
-        layout["margin"] = {
+        },
+        margin: {
             l: 0,
             r: 0,
             t: 0,
             b: 0,
             pad: 0
-        };
-    // if plotDiv wasn't specified, then put the graph in the drilldown page
-    } else if (!plotDiv) {
-        plotDiv = "plot";
+        },
+        barmode: "relative"
     }
+    if (data[metric].hasXLabelsOnMainDashboard) {
+        layout.margin.b = 20;
+    }
+    for (yaxis = 0; yaxis < data[metric].yPrefixes.length; yaxis++) {
+        var y = (yaxis == 0) ? "yaxis" : "yaxis" + (yaxis + 1);
+        layout[y] = {
+            showticklabels: false,
+            showgrid: false,
+            showline: false,
+            zeroline: false
+        }
+    }
+    var traces = makeTraces(data, metric, timescale, "dashboard");
     // make the plot
-    Plotly.newPlot(plotDiv, graphData, layout, {displayModeBar: false});
+    Plotly.newPlot(plotDiv, traces, layout, {displayModeBar: false});
 }
 
-// makes an individual row for a specific category in the breakout table on the drilldown page
-function makeTableRow(data, id, stat, category, colLT, colGT) {
-    var prefix = data[stat]["prefix"];
-    var suffix = data[stat]["suffix"];
-    var dps = data[stat]["dps"];
-    $("#category-data").append("<tr id='" + id + "'>");
-    for (i = 0; i < data[stat]["categoryValues"][category]["dates"].length; i++) {
-        var val = data[stat]["categoryValues"][category]["values"][i];
+function makeDrilldownPlot(data, metric, timescale) {
+    var layout = {
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        barmode: "relative",
+        legend: {
+            x: 1.04
+        }
+    };
+    for (yaxis = 0; yaxis < data[metric].yPrefixes.length; yaxis++) {
+        if (yaxis == 0) {
+            layout["yaxis"] = {
+                tickprefix: data[metric].yPrefixes[yaxis],
+                ticksuffix: data[metric].ySuffixes[yaxis]
+            };
+        } else {
+            layout["yaxis" + (yaxis + 1)] = {
+                tickprefix: data[metric].yPrefixes[yaxis],
+                ticksuffix: data[metric].ySuffixes[yaxis],
+                overlaying: "y",
+                side: "right",
+            };
+        }
+    }
+    var traces = makeTraces(data, metric, timescale, "drilldown");
+    Plotly.newPlot("plot", traces, layout, {displayModeBar: false});
+}
+
+function toggleTrace(data, metric, category) {
+    var traceIndex = data[metric].categories.indexOf(category);
+    category.state = !category.state;
+    Plotly.restyle("plot", {"visible": category.state}, traceIndex);
+}
+
+function makeTableRow(data, metric, category, id) {
+    var fontweight = "normal";
+    if (category.name.includes("Starting") || category.name.includes("Ending")) {
+        fontweight = "bold";
+    }
+    $("#categories").append("<tr style='font-weight: " + fontweight + "'><td>" + category.name + "</td></tr>");
+    $("#category-data").append("<tr id='" + id + "' style='font-weight: " + fontweight + "'>");
+    for (w = 0; w < data[metric].allDates.length; w++) {
+        var val = parseFloat(category.allValues[w]);
+        var bgcolor = "white";
+        if (data[metric].allDates[w].includes("Q")) {
+            bgcolor = "#f3f3f3";
+        } else if (data[metric].allDates[w].split(" ").length == 1) {
+            bgcolor = "#e5e5e5";
+        }
         $("#" + id).append(
-            "<td id='" + stat + id  + i + "'>" + prefix +
-            getFormattedValue(data, stat, val) + suffix+
+            "<td id='" + metric + id  + w + "'>" + category.prefix +
+            getFormattedValue(category, val) + category.suffix +
             "</td>"
         );
-        if (parseFloat(data[stat]["categoryValues"][category]["values"][i]) < 0) {
-            $("#" + stat + id + i).css({"color": colLT});
-        } else if (parseFloat(data[stat]["categoryValues"][category]["values"][i]) > 0) {
-            $("#" + stat + id + i).css({"color": colGT});
+        var posColor = category.posColor;
+        var negColor = category.negColor;
+        if (category.name.includes("Starting") || category.name.includes("Ending")) {
+            var posColor = "black";
+            var negColor = "black";
+        }
+        if (val < 0) {
+            $("#" + metric + id + w).css({"color": negColor, "background-color": bgcolor});
+        } else if (val >= 0) {
+            $("#" + metric + id + w).css({"color": posColor, "background-color": bgcolor});
         }
     }
     $("#category-data").append("</tr>");
 }
 
-// makes the breakout table for the drilldown page
-function makeTable(data, stat) {
-    prefix = data[stat]["prefix"]
-    suffix = data[stat]["suffix"]
-    dps = data[stat]["dps"]
+function makeTable(data, metric) {
     $("#category-data").append("<tr id='headers'>");
-    for (i = 0; i < data[stat]["categoryValues"]["Net New"]["dates"].length; i++) {
-        dateList = data[stat]["categoryValues"]["Net New"]["dates"][i].split(" ");
-        $("#headers").append(
-            "<th>" +
-            dateList[2] + " " + dateList[1].substring(2, dateList[1].length) +
-            "</th>"
-        );
+    for (i = 0; i < data[metric].allDates.length; i++) {
+        var bgcolor = "white";
+        if (data[metric].allDates[i].includes("Q")) {
+            bgcolor = "#f3f3f3";
+        } else if (data[metric].allDates[i].split(" ").length == 1) {
+            bgcolor = "#e5e5e5";
+        }
+        $("#headers").append("<th style='background-color: " + bgcolor + ";'>" + data[metric].allDates[i] + "</th>");
     }
     $("#category-data").append("</tr>");
-    makeTableRow(data, "new", stat, "New", "red", "green");
-    makeTableRow(data, "expansion", stat, "Expansion", "red", "green");
-    makeTableRow(data, "churn", stat, "Churn", "green", "red");
-    makeTableRow(data, "net-new", stat, "Net New", "red", "green");
+    var length = data[metric].categories.length;
+    $(".breakout-table").css({"height": (length + 1) * 40 + "px"});
+    for (j = 0; j < length; j++) {
+        var category = data[metric].categories[j];
+        var id = category.name.split(" ").join("-").replace(":", "");
+        makeTableRow(data, metric, category, id);
+    }
+    $("#scroll").css({"height": $("#category-data").css("height")});
 }
+

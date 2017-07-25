@@ -3,28 +3,30 @@ $(document).ready(function() {
 	$.getJSON("/data").done(function(data) {
 		console.log(data);
 		// make the main dashboard tiles for each given statistic
-		for (var stat in data) {
-			// if the stat should be displayed as a line graph, then show current value and percent change
-			if (data[stat]["graphType"] == "line") {
-				var temp = data[stat]["values"]["values"];
-				var currentValue = temp[temp.length - 1];
-				$("#" + stat + "Val").html(
-					data[stat]["prefix"] + 
-					getFormattedValue(data, stat, currentValue) +
-					data[stat]["suffix"]
+		for (var metric in data) {
+			if (data[metric].mainCategory != null) {
+				var category = data[metric].categories.find(x => x.name == data[metric].mainCategory);
+				var currentValue = getValue(category, data[metric].defaultTimescale, 0);
+				$("#" + metric + "Val").html(
+					category.prefix + 
+					getFormattedValue(category, currentValue) +
+					category.suffix
 				);
-				displayPctChange(data, stat, currentValue, 1, stat + "Change");
-				$("#" + stat + "Since").html(
-					"since 1 " + 
-					data[stat]["timescale"].substring(0, data[stat]["timescale"].length - 1) +
-					" ago"
-				);
-			// if the stat is a bar graph, move it down by 20px in the div
-			} else if (data[stat]["graphType"] == "bar") {
-				$("#" + stat + "Plot").css({"margin-top": "20px"});
+				var stepsBack = 3;
+				if (data[metric].defaultTimescale == "quarterly") {
+					stepsBack = 1;
+				}
+				var hasPctChange = displayPctChange(category, stepsBack, metric + "Change", data[metric].defaultTimescale);
+				if (hasPctChange) {
+					$("#" + metric + "Since").html("since 3 months ago");
+				}
 			}
-			$("#dash-stat-" + stat).prepend(data[stat]["title"]);
-			makePlot(data, stat, stat + "Plot");
+			$("#dash-metric-" + metric).html(data[metric].title);
+			$("#" + metric).append("<div class='dash-plot' id='" + metric + "Plot'></div>")
+			makeDashboardPlot(data, metric, metric + "Plot");
 		}
+		$(".print-button").click(function() {
+			window.print();
+		});
 	});
 });
